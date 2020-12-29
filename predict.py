@@ -72,7 +72,8 @@ def predict(country='United States', region = None, days_ahead=30, predict='case
     forecast = m.predict(future)[['ds','yhat']].tail(days_ahead+7)
     if rolling_mean:
         forecast['yhat'] = forecast['yhat'].rolling(window=7).mean()
-    json_forecast = pd.DataFrame(columns = ['date','prediction'])
+    json_forecast = pd.DataFrame(columns = ['id','date','prediction'])
+    json_forecast['id'] = range(len(forecast))
     json_forecast['date'] = forecast['ds'].dt.strftime('%m-%d-%Y')
     json_forecast['prediction'] = forecast['yhat'].round().astype(int)
 

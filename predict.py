@@ -42,7 +42,7 @@ def get_simple_covid_data():
     return df
 
 def predict(country='United States', region = None, days_ahead=30, predict='cases', output_folder = None,
-            rolling_mean = True):
+            rolling_mean = False):
     
     #retrieve latest covif data
     df = get_simple_covid_data()
@@ -72,22 +72,19 @@ def predict(country='United States', region = None, days_ahead=30, predict='case
     forecast = m.predict(future)[['ds','yhat']].tail(days_ahead+7)
     if rolling_mean:
         forecast['yhat'] = forecast['yhat'].rolling(window=7).mean()
-    json_forecast = pd.DataFrame(columns = ['id','date','prediction'])
-    json_forecast['id'] = range(len(forecast))
-    json_forecast['date'] = forecast['ds'].dt.strftime('%m-%d-%Y')
-    json_forecast['prediction'] = forecast['yhat'].round().astype(int)
+        forecast['yhat'].fillna(df.reset_index()['y'], inplace=True)
 
     #save forecast as JSON
+    json_forecast = pd.DataFrame(columns = ['id','date','prediction'])
+    json_forecast['date'] = forecast['ds'].dt.strftime('%m-%d-%Y')
+    json_forecast['id'] = range(len(forecast))
+    json_forecast['prediction'] = forecast['yhat'].round().astype(int)
     if output_folder:
         os.makedirs(os.path.dirname(output_folder), exist_ok=True)
     else: 
         output_folder = os.path.dirname(os.path.abspath(__file__))
-
-
     output_file_path = os.path.join(output_folder,'prediction.json')
-
-
-    json_forecast.to_json(output_file_path, orient='records', index=True)
+    json_forecast.to_json(output_file_path, orient='records')
 
     #create graph of forecasted cases
     fig = forecast.plot(x='ds', y='yhat', 
@@ -97,9 +94,9 @@ def predict(country='United States', region = None, days_ahead=30, predict='case
                         title = f'Predicted {days_ahead} Day Rolling Average',
                         xlabel = 'Date', ylabel = predict.title(), grid=True)
     output_image_path = os.path.join(output_folder,'prediction_graph.png')
-
     savefig(output_image_path, dpi=200)
     return forecast
+
 
 
 if __name__ == '__main__':

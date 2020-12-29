@@ -43,8 +43,8 @@ def get_simple_covid_data():
 
 def predict(country='United States', region = None, days_ahead=30, predict='cases', output_folder = None,
             rolling_mean = False):
-    
-    #retrieve latest covif data
+
+    #retrieve latest covid data
     df = get_simple_covid_data()
     
     #subset df by country and state.  Defaults if no regional info is passed is all of United States
@@ -86,16 +86,25 @@ def predict(country='United States', region = None, days_ahead=30, predict='case
     output_file_path = os.path.join(output_folder,'prediction.json')
     json_forecast.to_json(output_file_path, orient='records')
 
-    #create graph of forecasted cases
+    #create graph of forecasted casesc
+    if rolling_mean:
+        average = f'7-Day Rolling Average'
+    else:
+        average = 'Daily Cases'
+    if region:
+        title = f'{average}: {days_ahead} Day Prediction for {region}, {country}'
+    else: 
+        title = f'{average}: {days_ahead} Day Prediction for, {country}'
+        
     fig = forecast.plot(x='ds', y='yhat', 
                         ylim = (0,forecast['yhat'].max()*1.1),
                         xlim = (forecast['ds'].min(),forecast['ds'].max()),
                         figsize = (10,5),
-                        title = f'Predicted {days_ahead} Day Rolling Average',
+                        title = title,
                         xlabel = 'Date', ylabel = predict.title(), grid=True)
     output_image_path = os.path.join(output_folder,'prediction_graph.png')
     savefig(output_image_path, dpi=200)
-    return forecast
+#     return forecast[['ds','yhat']]
 
 
 
@@ -127,6 +136,14 @@ if __name__ == '__main__':
                         required=False,
                         help="True or False, whether to return the 7 day rolling mean")    
     args = parser.parse_args()
+    if args.country == None:
+        args.country = 'United States'
+    if args.days_ahead == None:
+        args.days_ahead = 30
+    args.days_ahead = int(args.days_ahead)
+    args.rolling_mean = bool(args.rolling_mean)
     print(f"Generating predictions {args.days_ahead} days ahead...")
-    predict(args.country, args.region, args.days_ahead, args.output_folder, args.rolling_mean)
+    predict(country = args.country, region = args.region, \
+            days_ahead = args.days_ahead, output_folder = args.output_folder, \
+            rolling_mean = args.rolling_mean)
     print("Done!")

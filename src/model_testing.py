@@ -15,8 +15,6 @@ def get_covid_data():
                            "CountryCode":str},
                     error_bad_lines=False)
 
-    #add new cases and new deaths columns
-
     return full_df
 
 def mean_percent_error(y_test, y_hat):

@@ -25,4 +25,12 @@ The model, with the proper lags, seemed to do well, however, predicting actual c
 
 Now, what remains to be seen is whether this exhaustive search to minimize the error in the December validation set also overfit the model.  The next test will be to take the same model and test it against January data to see if it continues to perform at high accuracy.
 
-Stay tuned!
+## Update:
+
+It's now 1/19/2021 and it seemed like a good time do another accuracy test.  I trained the same SARIMAX model with the same lags on COVID-19 cumulative case data at the national level in the United States, up until the new year (01-01-2021) and the accuracy is still almost 99% on the prediction for January.
+
+![January SARIMAX prediction](models/SARIMA_prediction2021_1_19.png)
+
+My takeaway here is that COVID cases in the United States is very predictable using only the cumulative case data itself, with appropriate AR and MA lags and the right lags for the weekly seasonality component.  This seems to suggest that government interventions, on the whole, have not really been game-changers in the progress of the disease, at least not since November.  
+
+We can only hope that my model is defeated by the rollout of vaccines.  That would be a good failure of my model.
